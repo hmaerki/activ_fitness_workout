@@ -146,6 +146,9 @@ class FitnessApp:
         document.getElementById("exercise-weight").value = str(
             exercise.get("weight", "")
         )
+        document.getElementById("exercise-repetitions").value = str(
+            exercise.get("repetitions", 15)
+        )
 
         btn_done = document.getElementById("btn-done")
         btn_done.textContent = "Undo Done" if exercise.get("done") else "Done"
@@ -157,6 +160,13 @@ class FitnessApp:
         if weight_val:
             try:
                 exercise["weight"] = float(weight_val)
+            except (ValueError, TypeError):
+                pass
+
+        reps_val = str(document.getElementById("exercise-repetitions").value)
+        if reps_val:
+            try:
+                exercise["repetitions"] = int(reps_val)
             except (ValueError, TypeError):
                 pass
 
