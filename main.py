@@ -1,4 +1,6 @@
-from pyscript import document, fetch
+from pyscript import document
+from pyodide.http import pyfetch
+from pyodide.ffi import create_proxy
 import json
 import js
 from datetime import datetime
@@ -18,22 +20,22 @@ class FitnessApp:
             self.workouts = json.loads(stored)
 
         document.getElementById("btn-new-workout").addEventListener(
-            "click", self.new_workout
+            "click", create_proxy(self.new_workout)
         )
         document.getElementById("btn-back-to-workouts").addEventListener(
-            "click", self.show_workouts
+            "click", create_proxy(self.show_workouts)
         )
         document.getElementById("btn-done").addEventListener(
-            "click", self.done_exercise
+            "click", create_proxy(self.done_exercise)
         )
         document.getElementById("btn-cancel").addEventListener(
-            "click", self.cancel_exercise
+            "click", create_proxy(self.cancel_exercise)
         )
         document.getElementById("workouts-list").addEventListener(
-            "click", self._on_workout_click
+            "click", create_proxy(self._on_workout_click)
         )
         document.getElementById("exercises-list").addEventListener(
-            "click", self._on_exercise_click
+            "click", create_proxy(self._on_exercise_click)
         )
 
         self.show_workouts()
@@ -83,7 +85,7 @@ class FitnessApp:
             container.appendChild(li)
 
     def new_workout(self, event=None) -> None:
-        date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+        date_str = datetime.now().strftime("%Y-%m-%d")
         self.workouts[date_str] = json.loads(json.dumps(self.exercises_template))
         self._save()
         self.show_workout(date_str)
@@ -164,11 +166,12 @@ class FitnessApp:
 
 
 async def _init() -> None:
-    response = await fetch("./assets/exercises.json")
-    text = await response.text()
+    response = await pyfetch("./assets/exercises.json")
+    text = await response.string()
     exercises_template = json.loads(text)
     global APP
     APP = FitnessApp(exercises_template)
 
 
-await _init()
+import asyncio
+asyncio.ensure_future(_init())
