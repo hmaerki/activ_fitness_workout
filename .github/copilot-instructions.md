@@ -6,17 +6,22 @@
 
 ## Tech Stack
 
-- **Frontend**: HTML, CSS (minimal JavaScript)
+- **Frontend**: HTML, CSS (minimal JavaScript). Use this as a base: https://github.com/pyscript/docs/tree/main/docs/example-apps/task-board-web
 - **Python runtime**: PyScript (WASM-based in-browser Python)
+- **Persistent data**:  https://docs.pyscript.net/2026.3.1/api/storage/
 - **No backend server** – everything runs client-side in the browser
 
 ## Project Structure
 
+Use this as a base: https://github.com/pyscript/examples/tree/main/tic-tac-toe
+
 ```
 experiment_activ_fitness/
-├── index.html          # Main HTML entry point
-├── main.py             # PyScript Python application code
-├── requirements.txt    # Python package dependencies for PyScript
+├── assets/
+│   └── exercises.json
+├── index.html
+├── main.py
+├── pyscript.toml
 └── README.md
 ```
 
@@ -24,10 +29,11 @@ experiment_activ_fitness/
 
 ### Python (PyScript)
 
-- Target **Python 3.11+** syntax
+- Target **Python 3.13+** syntax
 - Use type hints for function signatures
 - Keep PyScript-specific DOM manipulation in clearly named helper functions
 - Prefer `pyscript` and `pyodide` APIs for browser interaction over raw JavaScript interop when possible
+- If possible use `pyscript-micropython`
 - Format code with [Black](https://black.readthedocs.io/) (line length 88)
 - Use `snake_case` for variables and functions, `PascalCase` for classes
 
@@ -39,9 +45,21 @@ experiment_activ_fitness/
 
 ## Key Domain Concepts
 
-- **Training plan**: A structured weekly schedule of fitness exercises
-- **Exercise**: A single activity (e.g., running, cycling, strength training) with duration, intensity, and notes
-- **Week / Day**: Organizational units within the training plan
+- **Training plan**: This is given in `assets/exercises.json`
+
+## Web pages
+
+- **Workouts**: A list of dates when a workout was executed.
+    Top of page: Button "New workout".
+    "New workout" will copy assets/exercises.json into the local storage with the current date to allow changes.
+- **Workout**: Lists exercises: `key` and `short` from from `assets/exercises.json`.
+    Already executed exercises are grayed out.
+    When clicking on a exercise, the excercise page opens.
+- **Excercise**: 
+    Displays the details of the exercise.
+    Button `Done` marks the exercise as done. Add a new key `done` to exercises.json in the local storage.
+    Button `Cancel` closes the page.
+    The `weight` might be changed and stored in the local storage.
 
 ## Testing
 
