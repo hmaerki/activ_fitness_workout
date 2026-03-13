@@ -1,0 +1,174 @@
+from pyscript import document, fetch
+import json
+import js
+from datetime import datetime
+
+STORAGE_KEY = "activ_fitness_workouts"
+
+
+class FitnessApp:
+    def __init__(self, exercises_template: dict) -> None:
+        self.exercises_template = exercises_template
+        self.workouts: dict = {}
+        self.current_workout_date: str | None = None
+        self.current_exercise_key: str | None = None
+
+        stored = js.localStorage.getItem(STORAGE_KEY)
+        if stored:
+            self.workouts = json.loads(stored)
+
+        document.getElementById("btn-new-workout").addEventListener(
+            "click", self.new_workout
+        )
+        document.getElementById("btn-back-to-workouts").addEventListener(
+            "click", self.show_workouts
+        )
+        document.getElementById("btn-done").addEventListener(
+            "click", self.done_exercise
+        )
+        document.getElementById("btn-cancel").addEventListener(
+            "click", self.cancel_exercise
+        )
+        document.getElementById("workouts-list").addEventListener(
+            "click", self._on_workout_click
+        )
+        document.getElementById("exercises-list").addEventListener(
+            "click", self._on_exercise_click
+        )
+
+        self.show_workouts()
+
+    def _save(self) -> None:
+        js.localStorage.setItem(STORAGE_KEY, json.dumps(self.workouts))
+
+    def _show_view(self, view_id: str) -> None:
+        for vid in ("view-workouts", "view-workout", "view-exercise"):
+            el = document.getElementById(vid)
+            if vid == view_id:
+                el.removeAttribute("hidden")
+            else:
+                el.setAttribute("hidden", "hidden")
+
+    def show_workouts(self, event=None) -> None:
+        self._show_view("view-workouts")
+        container = document.getElementById("workouts-list")
+        container.innerHTML = ""
+
+        if not self.workouts:
+            li = document.createElement("li")
+            li.textContent = "No workouts yet. Click 'New workout' to start!"
+            li.className = "empty-hint"
+            container.appendChild(li)
+            return
+
+        for date_str in sorted(self.workouts.keys(), reverse=True):
+            workout = self.workouts[date_str]
+            done_count = sum(1 for ex in workout.values() if ex.get("done"))
+            total = len(workout)
+
+            li = document.createElement("li")
+            li.className = "workout-item"
+            li.setAttribute("data-date", date_str)
+
+            span_date = document.createElement("span")
+            span_date.className = "workout-date"
+            span_date.textContent = date_str
+
+            span_progress = document.createElement("span")
+            span_progress.className = "workout-progress"
+            span_progress.textContent = f"{done_count}/{total} done"
+
+            li.appendChild(span_date)
+            li.appendChild(span_progress)
+            container.appendChild(li)
+
+    def new_workout(self, event=None) -> None:
+        date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.workouts[date_str] = json.loads(json.dumps(self.exercises_template))
+        self._save()
+        self.show_workout(date_str)
+
+    def _on_workout_click(self, event) -> None:
+        target = event.target.closest(".workout-item")
+        if target:
+            date_str = str(target.getAttribute("data-date"))
+            self.show_workout(date_str)
+
+    def show_workout(self, date_str: str) -> None:
+        self.current_workout_date = date_str
+        self._show_view("view-workout")
+        document.getElementById("workout-date").textContent = date_str
+
+        container = document.getElementById("exercises-list")
+        container.innerHTML = ""
+
+        workout = self.workouts[date_str]
+        for key, exercise in workout.items():
+            li = document.createElement("li")
+            li.className = "exercise-item" + (" done" if exercise.get("done") else "")
+            li.setAttribute("data-key", key)
+
+            span_key = document.createElement("span")
+            span_key.className = "exercise-key"
+            span_key.textContent = key
+
+            span_name = document.createElement("span")
+            span_name.className = "exercise-name"
+            span_name.textContent = exercise["short"]
+
+            li.appendChild(span_key)
+            li.appendChild(span_name)
+            container.appendChild(li)
+
+    def _on_exercise_click(self, event) -> None:
+        target = event.target.closest(".exercise-item")
+        if target:
+            key = str(target.getAttribute("data-key"))
+            self.show_exercise(key)
+
+    def show_exercise(self, exercise_key: str) -> None:
+        self.current_exercise_key = exercise_key
+        self._show_view("view-exercise")
+
+        exercise = self.workouts[self.current_workout_date][exercise_key]
+        document.getElementById("exercise-key").textContent = exercise_key
+        document.getElementById("exercise-short").textContent = exercise.get(
+            "short", ""
+        )
+        document.getElementById("exercise-comment").textContent = exercise.get(
+            "comment", ""
+        )
+        document.getElementById("exercise-weight").value = str(
+            exercise.get("weight", "")
+        )
+
+        btn_done = document.getElementById("btn-done")
+        btn_done.textContent = "Undo Done" if exercise.get("done") else "Done"
+
+    def done_exercise(self, event=None) -> None:
+        exercise = self.workouts[self.current_workout_date][self.current_exercise_key]
+
+        weight_val = str(document.getElementById("exercise-weight").value)
+        if weight_val:
+            try:
+                exercise["weight"] = float(weight_val)
+            except (ValueError, TypeError):
+                pass
+
+        exercise["done"] = not exercise.get("done", False)
+        self._save()
+        self.show_workout(self.current_workout_date)
+
+    def cancel_exercise(self, event=None) -> None:
+        self.show_workout(self.current_workout_date)
+
+
+async def _init() -> None:
+    response = await fetch("./assets/exercises.json")
+    text = await response.text()
+    exercises_template = json.loads(text)
+    global APP
+    APP = FitnessApp(exercises_template)
+
+
+await _init()
