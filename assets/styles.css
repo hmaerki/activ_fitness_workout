@@ -29,10 +29,27 @@ body {
   margin: 0;
   font-family: system-ui, sans-serif;
   background-color: var(--bg);
-  background-image: url('../assets/hans_im_glueck.svg');
-  background-repeat: repeat;
-  background-size: 120px auto;
   color: #212121;
+}
+
+/* ── Hans im Glück floating animation ────────────────────── */
+#hans-walker {
+  position: fixed;
+  top: 80vh;
+  width: 90px;
+  height: auto;
+  pointer-events: none;
+  z-index: 0;
+  animation: hans-walk 25s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes hans-walk {
+  0%   { left: -100px;              opacity: 1.0; transform: scaleX(1); }
+  49%  { left: calc(100vw + 100px); opacity: 0.0; transform: scaleX(1); }
+  50%  { left: calc(100vw + 100px); opacity: 0.0; transform: scaleX(-1); }
+  99%  { left: -100px;              opacity: 1.0; transform: scaleX(-1); }
+  100% { left: -100px;              opacity: 1.0; transform: scaleX(1); }
 }
 
 /* ── Header ───────────────────────────────────────────────── */
