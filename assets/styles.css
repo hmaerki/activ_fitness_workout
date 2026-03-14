@@ -254,3 +254,9 @@ li.empty-hint {
   flex-wrap: wrap;
   justify-content: space-between;
 }
+
+button svg {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+}
