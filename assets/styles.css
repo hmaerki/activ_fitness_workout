@@ -111,18 +111,6 @@ button.secondary:hover {
   background: #bdbdbd;
 }
 
-button.back-btn {
-  background: transparent;
-  color: var(--primary);
-  padding: 0.3rem 0;
-  font-size: 0.95rem;
-  margin-bottom: 0.75rem;
-}
-
-button.back-btn:hover {
-  text-decoration: underline;
-}
-
 /* ── Lists ────────────────────────────────────────────────── */
 ul {
   list-style: none;

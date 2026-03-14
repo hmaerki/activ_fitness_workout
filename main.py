@@ -8,8 +8,7 @@ STORAGE_KEY = "activ_fitness_workouts"
 
 
 class FitnessApp:
-    def __init__(self, exercises_template: dict) -> None:
-        self.exercises_template = exercises_template
+    def __init__(self) -> None:
         self.workouts: dict = {}
         self.current_workout_date: str | None = None
         self.current_exercise_key: str | None = None
@@ -77,8 +76,16 @@ class FitnessApp:
             container.appendChild(li)
 
     def new_workout(self, event=None) -> None:
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        self.workouts[date_str] = json.loads(json.dumps(self.exercises_template))
+        if len(self.workouts) > 0:
+            last_date = max(self.workouts.keys())
+            template = self.workouts[last_date].copy()
+            for exercise in template.values():
+                exercise.pop("done", None)
+        else:
+            template = json.loads(json.dumps(EXERCISES))
+
+        date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.workouts[date_str] = template
         self._save()
         self.show_workout(date_str)
 
@@ -215,4 +222,4 @@ class FitnessApp:
         self.show_workouts()
 
 
-APP = FitnessApp(EXERCISES)
+APP = FitnessApp()
