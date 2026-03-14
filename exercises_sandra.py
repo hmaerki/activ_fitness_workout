@@ -1,52 +1,79 @@
 EXERCISES = {
-    "SA5": {
-        "short": "Leg Curls",
-        "comment": "Technogym, Sitz 6, Fuss 6, ROM 2",
-        "weight": 35.0
+    "E1": {
+        "short": "ROM 1",
+        "comment": "Abduktor",
+        "weight": 54.5,
+        "set1": 16,
+        "set2": 16,
     },
-    "SA1": {
-        "short": "Leg Press",
-        "comment": "Sitz 4, Fuss 1",
-        "weight": 60.0
+    "E2": {
+        "short": "ROM 5",
+        "comment": "Adduktor",
+        "weight": 38.3,
+        "set1": 16,
+        "set2": 16,
     },
-    "SC3": {
-        "short": "Torso Rotation sitting",
-        "comment": "Nautilus ROM 80",
-        "weight": 36.0
+    "A5": {
+        "short": "Beinbeuger",
+        "comment": "Technogym, Sitz 2, Fuss 1, ROM 2",
+        "weight": 17.5,
+        "set1": 17,
+        "set2": 17,
     },
-    "SC1": {
-        "short": "Abdominal Crunch",
-        "comment": "Nautilus, Sitz 6",
-        "weight": 30.0
+    "A2": {
+        "short": "Beinpresse",
+        "comment": "Sitz 1, Fuss 2",
+        "weight": 40.0,
+        "set1": 18,
+        "set2": 18,
     },
-    "D1/D4": {
-        "short": "Chest Press",
-        "comment": "Nautilus, Sitz 7, Rücken 2",
-        "weight": 30.0
+    "C1": {
+        "short": "Bauch Crunch",
+        "comment": "Nautilus, Sitz 3",
+        "weight": 30.0,
+        "set1": 18,
+        "set2": 18,
+    },
+    "Mitte1": {
+        "short": "Kurzhantel 45 Bank Seitenneigen",
+        "comment": "Höhe 4",
+        "weight": 3.0,
+        "set1": 17,
+        "set2": 17,
+    },
+    "Mitte2": {
+        "short": "45 Bank Rückenstrecken mit Gewicht",
+        "comment": "Höhe 2",
+        "weight": 3.0,
+        "set1": 16,
+        "set2": 16,
     },
     "B5": {
-        "short": "Lat Pull",
-        "comment": "Technogym, Sitz 6",
-        "weight": 40.0
+        "short": "Lat Zug",
+        "comment": "Technogym, Sitz 4",
+        "weight": 27.5,
+        "set1": 18,
+        "set2": 18,
     },
-    "B4": {
-        "short": "Cable Row Close",
-        "comment": "Technogym",
-        "weight": 20.0
-    },
-    "B2/B7": {
-        "short": "Butterfly",
-        "comment": "Nautilus, Rücken 2",
-        "weight": 23.0
-    },
-    "B3": {
-        "short": "Back Extension",
-        "comment": "Technogym, Rücken 4, ROM 2",
-        "weight": 35.0
+    "D2": {
+        "short": "Butterfly gebeugte Arme",
+        "comment": "Technogym, Sitz 4",
+        "weight": 12.5,
+        "set1": 16,
+        "set2": 16,
     },
     "F1": {
-        "short": "Shoulder Press",
-        "comment": "Technogym, Sitz 6",
-        "weight": 15.0
-    }
+        "short": "Schulterdrücken",
+        "comment": "Technogym, Sitz 4",
+        "weight": 7.5,
+        "set1": 15,
+        "set2": 15,
+    },
+    "H2": {
+        "short": "Trizepsstrecken",
+        "comment": "Sitz 4, Rücken 4",
+        "weight": 9.0,
+        "set1": 18,
+        "set2": 18,
+    },
 }
