@@ -1,14 +1,23 @@
 from pyscript import document, when
-from exercises import EXERCISES
+import exercises_hans
+import exercises_sandra
 import json
 import js
 from datetime import datetime
 
 STORAGE_KEY = "activ_fitness_workouts"
+STORAGE_WHO = "activ_fitness_who"
+
+WHO_MAP = {
+    "hans":   {"image": "hans_im_glueck.svg",   "name": "Hans"},
+    "sandra": {"image": "sandra_im_glueck.svg", "name": "Sandra"},
+}
+WHO_ORDER = ["hans", "sandra"]
 
 
 class FitnessApp:
     def __init__(self) -> None:
+        print("FitnessApp()")
         self.workouts: dict = {}
         self.current_workout_date: str | None = None
         self.current_exercise_key: str | None = None
@@ -17,7 +26,12 @@ class FitnessApp:
         if stored:
             self.workouts = json.loads(stored)
 
+        stored_who = js.localStorage.getItem(STORAGE_WHO)
+        self.who: str = stored_who if stored_who in WHO_MAP else "hans"
+        self._apply_who()
+
         when("click", "#btn-new-workout")(self.new_workout)
+        when("click", "#hans-walker")(self.toggle_who)
         when("click", "#btn-back-to-workouts")(self.show_workouts)
         when("click", "#btn-done")(self.done_exercise)
         when("click", "#btn-cancel")(self.cancel_exercise)
@@ -33,6 +47,17 @@ class FitnessApp:
 
     def _save(self) -> None:
         js.localStorage.setItem(STORAGE_KEY, json.dumps(self.workouts))
+
+    def _apply_who(self) -> None:
+        info = WHO_MAP[self.who]
+        document.getElementById("hans-walker").src = f"./assets/{info['image']}"
+        document.getElementById("who-name").textContent = info["name"]
+
+    def toggle_who(self, event=None) -> None:
+        idx = (WHO_ORDER.index(self.who) + 1) % len(WHO_ORDER)
+        self.who = WHO_ORDER[idx]
+        js.localStorage.setItem(STORAGE_WHO, self.who)
+        self._apply_who()
 
     def _show_view(self, view_id: str) -> None:
         for vid in ("view-workouts", "view-workout", "view-exercise", "view-json"):
@@ -76,16 +101,17 @@ class FitnessApp:
             container.appendChild(li)
 
     def new_workout(self, event=None) -> None:
+        print("new_workout() a")
         if len(self.workouts) > 0:
             last_date = max(self.workouts.keys())
-            template = self.workouts[last_date].copy()
+            template = self.workouts[last_date]
             for exercise in template.values():
                 exercise.pop("done", None)
         else:
-            template = json.loads(json.dumps(EXERCISES))
+            template = exercises_hans.EXERCISES if self.who == "hans" else exercises_sandra.EXERCISES
 
         date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.workouts[date_str] = template
+        self.workouts[date_str] = template.copy()
         self._save()
         self.show_workout(date_str)
 

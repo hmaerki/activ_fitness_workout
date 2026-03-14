@@ -1,3 +1,13 @@
+py-terminal {
+  display: block;
+  min-height: 80px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: monospace;
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
 /* ── Loading splash ───────────────────────────────────────── */
 #loading {
   outline: none;
@@ -38,8 +48,9 @@ body {
   top: 80vh;
   width: 90px;
   height: auto;
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 100;
   animation: hans-walk 25s linear infinite;
   transform-origin: center center;
 }
