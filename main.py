@@ -40,6 +40,7 @@ class FitnessApp:
         when("click", "#btn-back-from-json")(self._back_from_json)
         when("click", "#btn-back-from-json2")(self._back_from_json)
         when("click", "#btn-save-json")(self._save_json)
+        when("click", "#btn-delete-storage")(self._delete_storage)
         when("click", "#workouts-list")(self._on_workout_click)
         when("click", "#exercises-list")(self._on_exercise_click)
 
@@ -255,6 +256,12 @@ class FitnessApp:
 
     def _back_from_json(self, event=None) -> None:
         self.show_workout(self.current_workout_date)
+
+    def _delete_storage(self, event=None) -> None:
+        js.localStorage.removeItem(STORAGE_KEY)
+        self.workouts = {}
+        self.current_workout_date = None
+        self.show_workouts()
 
     def cancel_exercise(self, event=None) -> None:
         self.show_workout(self.current_workout_date)
