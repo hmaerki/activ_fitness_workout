@@ -1,4 +1,5 @@
 from pyscript import document
+from pyscript.ffi import create_proxy
 import exercises_hans
 import exercises_sandra
 import json
@@ -36,10 +37,13 @@ class FitnessApp:
         self._apply_who()
 
         def _add(id, fn):
-            document.getElementById(id).addEventListener("click", fn)
+            if IS_MICROPYTHON:
+             document.getElementById(id).addEventListener("click", fn)
+            else:
+             document.getElementById(id).addEventListener("click", create_proxy(fn))
 
         _add("btn-new-workout", self.new_workout)
-        _add("hans-walker", self.toggle_who)
+        _add("hans-im-glueck", self.toggle_who)
         _add("btn-back-to-workouts", self.show_workouts)
         _add("btn-done", self.done_exercise)
         _add("btn-cancel", self.cancel_exercise)
@@ -59,7 +63,7 @@ class FitnessApp:
 
     def _apply_who(self) -> None:
         info = WHO_MAP[self.who]
-        document.getElementById("hans-walker").src = f"./assets/{info['image']}"
+        document.getElementById("hans-im-glueck").src = f"./assets/{info['image']}"
         document.getElementById("who-name").textContent = info["name"]
 
     def toggle_who(self, event=None) -> None:
