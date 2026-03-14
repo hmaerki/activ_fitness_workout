@@ -130,7 +130,12 @@ class FitnessApp:
         container.innerHTML = ""
 
         workout = self.workouts[date_str]
-        for key, exercise in workout.items():
+        sorted_items = sorted(
+            workout.items(),
+            key=lambda kv: kv[1]["factor"],
+            reverse=True,
+        )
+        for key, exercise in sorted_items:
             li = document.createElement("li")
             li.className = "exercise-item" + (" done" if exercise.get("done") else "")
             li.setAttribute("data-key", key)
