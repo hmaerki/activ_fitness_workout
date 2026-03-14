@@ -142,7 +142,10 @@ class FitnessApp:
             card.classList.remove("done")
 
         btn_done = document.getElementById("btn-done")
-        btn_done.textContent = "Undo Done" if exercise.get("done") else "Done"
+        if exercise.get("done"):
+            btn_done.innerHTML = '<i class="fa-solid fa-arrow-left fa-lg"></i> Undo Done'
+        else:
+            btn_done.innerHTML = 'Done <i class="fa-solid fa-arrow-right fa-lg"></i>'
 
     def done_exercise(self, event=None) -> None:
         exercise = self.workouts[self.current_workout_date][self.current_exercise_key]
