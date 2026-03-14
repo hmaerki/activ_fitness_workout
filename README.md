@@ -2,6 +2,8 @@
 
 A web-based fitness training plan application built with [PyScript](https://pyscript.net/), which enables Python to run directly in the browser via WebAssembly (WASM).
 
+Run it: https://hmaerki.github.io/experiment_activ_fitness
+
 ## Features
 
 - **Workouts list** – shows all recorded workout sessions with progress (done/total exercises)
@@ -25,7 +27,7 @@ Then navigate to `http://localhost:8000`.
 ```
 experiment_activ_fitness/
 ├── assets/
-│   └── exercises.json   # training-plan template
+│   └── exercises.py   # training-plan template
 ├── index.html           # single-page app shell + CSS
 ├── main.py              # PyScript application logic
 ├── pyscript.toml        # PyScript configuration
