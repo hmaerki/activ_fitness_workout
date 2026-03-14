@@ -191,16 +191,25 @@ li.empty-hint {
   color: var(--primary);
 }
 
-.detail-card .exercise-short {
-  font-size: 1.1rem;
-  font-weight: 500;
+.detail-card .exercise-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #212121;
   margin: 0 0 0.5rem;
 }
 
-.detail-card .exercise-comment {
+.detail-card .exercise-title #exercise-key {
+  color: var(--primary);
+}
+
+.detail-card .exercise-title #exercise-short {
   color: var(--muted);
+}
+
+.detail-card .exercise-comment {
   margin: 0 0 1rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .weight-row {
