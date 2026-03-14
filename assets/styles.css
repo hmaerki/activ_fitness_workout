@@ -1,0 +1,228 @@
+/* ── Loading splash ───────────────────────────────────────── */
+#loading {
+  outline: none;
+  border: none;
+  background: transparent;
+}
+
+/* ── CSS custom properties ────────────────────────────────── */
+:root {
+  --primary: #1976d2;
+  --primary-dark: #0d47a1;
+  --success: #388e3c;
+  --muted: #757575;
+  --muted-bg: #f0f0f0;
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --radius: 6px;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: #212121;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+header {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* ── Main content ─────────────────────────────────────────── */
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+button.primary:hover {
+  background: var(--primary-dark);
+}
+
+button.secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+button.secondary:hover {
+  background: #bdbdbd;
+}
+
+button.back-btn {
+  background: transparent;
+  color: var(--primary);
+  padding: 0.3rem 0;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+button.back-btn:hover {
+  text-decoration: underline;
+}
+
+/* ── Lists ────────────────────────────────────────────────── */
+ul {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+li {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 0.55rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Workouts list */
+li.workout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+li.workout-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.workout-date {
+  font-weight: 500;
+}
+
+.workout-progress {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Exercises list */
+li.exercise-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+}
+
+li.exercise-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+li.exercise-item.done {
+  background: var(--muted-bg);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.exercise-key {
+  font-weight: 700;
+  min-width: 60px;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+
+li.exercise-item.done .exercise-key {
+  color: var(--muted);
+}
+
+/* Empty hint */
+li.empty-hint {
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ── Exercise detail card ─────────────────────────────────── */
+.detail-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.detail-card h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  color: var(--primary);
+}
+
+.detail-card .exercise-short {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+}
+
+.detail-card .exercise-comment {
+  color: var(--muted);
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.weight-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.weight-row label {
+  font-weight: 500;
+}
+
+.weight-row input[type="number"] {
+  width: 90px;
+  padding: 0.45rem 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+}
+
+.weight-row .unit {
+  color: var(--muted);
+}
+
+.btn-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
