@@ -28,6 +28,16 @@
   </head>
 
   <body>
+    <!-- ── SVG arrow symbols ──────────────────────────────────── -->
+    <svg hidden style="display:none" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </symbol>
+      <symbol id="arrow-right" viewBox="0 0 24 24">
+        <use href="#arrow-left" transform="scale(-1,1) translate(-24,0)"/>
+      </symbol>
+    </svg>
+
     <dialog id="loading">
       <h1>Loading…</h1>
     </dialog>
@@ -45,10 +55,10 @@
 
       <!-- ── View: Single workout ─────────────────────────────── -->
       <section id="view-workout" hidden>
-        <button id="btn-back-to-workouts" class="back-btn"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Workouts</button>
+        <button id="btn-back-to-workouts" class="back-btn"><svg width="22" height="22"><use href="#arrow-left"/></svg> Workouts</button>
         <h2 id="workout-date"></h2>
         <ul id="exercises-list"></ul>
-        <button id="btn-delete-workout" class="primary" style="margin-top:1rem;">Delete this workout</button>
+        <button id="btn-delete-workout" class="primary" style="margin-top:1rem;">Delete this workout <svg width="22" height="22"><use href="#arrow-right"/></svg></button>
       </section>
 
       <!-- ── View: Exercise detail ─────────────────────────────── -->
@@ -76,8 +86,8 @@
             />
           </div>
           <div class="btn-row">
-            <button id="btn-cancel" class="secondary"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Cancel</button>
-            <button id="btn-done" class="primary">Done <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+            <button id="btn-cancel" class="secondary"><svg width="22" height="22"><use href="#arrow-left"/></svg> Cancel</button>
+            <button id="btn-done" class="primary">Done <svg width="22" height="22"><use href="#arrow-right"/></svg></button>
           </div>
         </div>
       </section>
