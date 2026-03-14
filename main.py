@@ -135,6 +135,12 @@ class FitnessApp:
             exercise.get("repetitions", 15)
         )
 
+        card = document.getElementById("exercise-detail-card")
+        if exercise.get("done"):
+            card.classList.add("done")
+        else:
+            card.classList.remove("done")
+
         btn_done = document.getElementById("btn-done")
         btn_done.textContent = "Undo Done" if exercise.get("done") else "Done"
 

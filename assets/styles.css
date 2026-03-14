@@ -173,6 +173,11 @@ li.empty-hint {
 }
 
 /* ── Exercise detail card ─────────────────────────────────── */
+.detail-card.done {
+  background: var(--muted-bg);
+  color: var(--muted);
+}
+
 .detail-card {
   background: var(--card);
   border-radius: var(--radius);
@@ -225,4 +230,5 @@ li.empty-hint {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
+  justify-content: space-between;
 }
