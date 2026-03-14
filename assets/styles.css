@@ -53,6 +53,12 @@ header h1 {
   width: auto;
 }
 
+.header-hans {
+  height: 120px;
+  width: auto;
+  margin-left: auto;
+}
+
 /* ── Main content ─────────────────────────────────────────── */
 main {
   max-width: 640px;
