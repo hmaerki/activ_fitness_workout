@@ -79,25 +79,25 @@ WHO_HANS = Who(
     image="hans_im_glueck.svg",
     exercises=[
         Exercise(
+            "F1",
+            "Shoulder Press",
+            "Technogym, Sitz 6",
+        ),
+        Exercise(
             "D1/D4",
             "Chest Press",
             "Nautilus, Sitz 7, Rücken 2",
             FACTOR_DOUBLE_EXERCISE,
         ),
         Exercise(
-            "B2/B7",
+            "B7/D2",
             "Butterfly",
-            "Nautilus, Rücken 2",
+            "Nautilus, Fuss 4, Rücken 2",
             FACTOR_DOUBLE_EXERCISE,
         ),
         Exercise(
             "B5",
             "Lat Pull",
-            "Technogym, Sitz 6",
-        ),
-        Exercise(
-            "F1",
-            "Shoulder Press",
             "Technogym, Sitz 6",
         ),
         Exercise(
@@ -125,7 +125,7 @@ WHO_HANS = Who(
         Exercise(
             "A5",
             "Leg Curls",
-            "Technogym, Sitz 6, Fuss 6, ROM 2",
+            "Technogym, Sitz 6, Fuss 5, ROM 2",
             FACTOR_TWO_MACHINES,
         ),
         Exercise(
