@@ -1,68 +1,45 @@
-# from __future__ import annotations
+from __future__ import annotations
+import dataclasses
 
 from pyscript import document, when
 import configuration
-import json
 import js
+import copy
 
-try:
-    import micropython
-
-    IS_MICROPYTHON = True
-except ImportError:
-    IS_MICROPYTHON = False
 
 STORAGE_KEY = "activ_fitness_workouts"
 STORAGE_WHO = "activ_fitness_who"
 
 
+@dataclasses.dataclass
 class CurrentExercise:
-    def __init__(
-        self,
-        workout_date: str,
-        exercise: configuration.Exercise,
-        workout_exercise: dict[str, float | int | bool],
-    ) -> None:
-        assert isinstance(workout_date, str)
-        assert isinstance(exercise, configuration.Exercise)
-        assert isinstance(workout_exercise, dict)
-        configuration.who.validate_workout_exercise(workout_exercise=workout_exercise)
+    workout_date: str
+    exercise: configuration.Exercise
+    workout_exercise: configuration.WorkoutExercise
 
-        self.workout_date = workout_date
-        self.exercise = exercise
-        self.workout_exercise = workout_exercise
+    def __post_init__(self) -> None:
+        assert isinstance(self.workout_date, str)
+        assert isinstance(self.exercise, configuration.Exercise)
+        assert isinstance(self.workout_exercise, configuration.WorkoutExercise)
 
-    def get_value(
+    def get_workout_exercise(
         self,
         persistence: "Persistence",
-        key: str,
-    ) -> float | int | bool:
-        return persistence.get_exercise_value(
+    ) -> configuration.WorkoutExercise:
+        return persistence.get_exercise(
             workout_date=self.workout_date,
             machine=self.exercise.machine,
-            key=key,
-        )
-
-    def set_value(
-        self,
-        persistence: "Persistence",
-        key: str,
-        value: float | int | bool,
-    ) -> None:
-        persistence.set_exercise_value(
-            workout_date=self.workout_date,
-            machine=self.exercise.machine,
-            key=key,
-            value=value,
         )
 
 
 class Persistence:
     def __init__(self) -> None:
-        self.dict_workouts: dict[str, dict] = {}  # type: ignore
+        self.workouts = configuration.Workouts()
         workouts_text = js.localStorage.getItem(STORAGE_KEY)
         if workouts_text:
-            self.dict_workouts = json.loads(workouts_text)
+            self.workouts = configuration.Workouts.persistent_factory(
+                workouts_text=workouts_text
+            )
         _who_key = js.localStorage.getItem(STORAGE_WHO)
         if _who_key:
             who_key = str(_who_key)
@@ -70,86 +47,54 @@ class Persistence:
             who_key = configuration.WHO_HANS.key
         self.who = configuration.DICT_WHO[who_key]
 
-    @property
-    def has_workouts(self) -> bool:
-        return len(self.dict_workouts) > 0
-
-    @property
-    def workout_dates(self) -> list[str]:
-        return sorted(self.dict_workouts.keys(), reverse=True)
-
     def get_progress(self, workout_date: str) -> str:
-        dict_workout = self.dict_workouts[workout_date]
-        done_count = sum(1 for v in dict_workout.values() if v.get("done"))
-        total_count = len(dict_workout)
-        return f"{done_count}/{total_count} done"
+        workout = self.workouts.get_workout(workout_date=workout_date)
+        return workout.exercises.progress_text
 
     def get_workout(
         self,
         workout_date: str,
         remove_done: bool = False,
-    ) -> dict[str, dict[str, float | int | bool]]:
-        dict_workout_exercise = self.dict_workouts[workout_date]
+    ) -> configuration.Workout:
+        workout = self.workouts.get_workout(workout_date=workout_date)
         if remove_done:
-            for _machine, dict_workout in dict_workout_exercise.items():
-                if "done" in dict_workout:
-                    del dict_workout["done"]
-        return dict_workout_exercise
+            for exercise in workout.exercises:
+                exercise.done = False
+        return workout
 
-    def _get_exercise(
+    def get_exercise(
         self,
         workout_date: str,
         machine: str,
-    ) -> dict[str, float | int | bool]:
-        return self.get_workout(workout_date=workout_date).get(machine, {})
-
-    def get_exercise_value(
-        self,
-        workout_date: str,
-        machine: str,
-        key: str,
-    ) -> float | bool:
-        assert key in configuration.Who.WORKOUT_KEYS
-        default_value = self.who.get_default_value(machine=machine, key=key)
-        return self._get_exercise(workout_date=workout_date, machine=machine).get(
-            key, default_value
+    ) -> configuration.WorkoutExercise:
+        return self.get_workout(workout_date=workout_date).exercises.get_exercise(
+            machine=machine
         )
-
-    def set_exercise_value(
-        self, workout_date: str, machine: str, key: str, value: float | int | bool
-    ) -> None:
-        assert key in configuration.Who.WORKOUT_KEYS
-        self._get_exercise(workout_date=workout_date, machine=machine)[key] = value
-
-    def get_done(self, workout_date: str, machine: str) -> bool:
-        done = self.get_exercise_value(
-            workout_date=workout_date, machine=machine, key="done"
-        )
-        assert isinstance(done, bool)
-        return done
 
     def get_current_exercise(self, workout_date: str, machine: str) -> CurrentExercise:
         return CurrentExercise(
             workout_date=workout_date,
             exercise=self.who.get_exercise(machine=machine),
-            workout_exercise=self._get_exercise(
+            workout_exercise=self.get_exercise(
                 workout_date=workout_date, machine=machine
             ),
         )
 
-    def set_workout(
-        self,
-        workout_date: str,
-        dict_workout: dict[str, dict[str, float | int | bool]],
-    ) -> None:
-        configuration.Who.validate_workout(dict_workout=dict_workout)
-        self.dict_workouts[workout_date] = dict_workout
+    def set_workouts(self, workouts: configuration.Workouts) -> None:
+        configuration.Who.validate_workouts(workouts=workouts)
+        self.workouts = workouts
 
-    def new_workout(self, workout_str: str) -> None:
-        self.dict_workouts[workout_str] = self.who.workout_template.copy()
+    def new_workout(self, workout_date: str) -> None:
+        assert isinstance(workout_date, str)
+        self.workouts.append(
+            configuration.Workout(
+                workout_date=workout_date,
+                exercises=copy.deepcopy(self.who.workout_template),
+            )
+        )
 
     def save(self) -> None:
-        js.localStorage.setItem(STORAGE_KEY, json.dumps(self.dict_workouts))
+        js.localStorage.setItem(STORAGE_KEY, self.workouts.persistent_text)
 
     def delete_workout(self, workout_date: str) -> None:
         if workout_date in self.dict_workouts:
@@ -174,26 +119,18 @@ class FitnessApp:
 
         self._dom_update_who()
 
-        def _add(id, fn):
-            if IS_MICROPYTHON:
-                document.getElementById(id).addEventListener("click", fn)
-            else:
-                # from pyscript.ffi import create_proxy
-                # document.getElementById(id).addEventListener("click", create_proxy(fn))
-                when("click", "#" + id)(fn)
-
-        _add("btn-new-workout", self.on_new_workout)
-        _add("hans-im-glueck", self.on_toggle_who)
-        _add("btn-back-to-workouts", self.on_show_workouts)
-        _add("btn-done", self.on_done_exercise)
-        _add("btn-cancel", self.on_cancel_exercise)
-        _add("btn-delete-workout", self.on_delete_workout)
-        _add("btn-show-json", self.on_show_json)
-        _add("btn-back-from-json", self.on_back_from_json)
-        _add("btn-save-json", self.on_save_json)
-        _add("btn-delete-storage", self.on_delete_storage)
-        _add("workouts-list", self.on_workout_click)
-        _add("exercises-list", self.on_exercise_click)
+        when("click", "#btn-new-workout")(self.on_new_workout)
+        when("click", "#hans-im-glueck")(self.on_toggle_who)
+        when("click", "#btn-back-to-workouts")(self.on_show_workouts)
+        when("click", "#btn-done")(self.on_done_exercise)
+        when("click", "#btn-cancel")(self.on_cancel_exercise)
+        when("click", "#btn-delete-workout")(self.on_delete_workout)
+        when("click", "#btn-show-json")(self.on_show_json)
+        when("click", "#btn-back-from-json")(self.on_back_from_json)
+        when("click", "#btn-save-json")(self.on_save_json)
+        when("click", "#btn-delete-storage")(self.on_delete_storage)
+        when("click", "#workouts-list")(self.on_workout_click)
+        when("click", "#exercises-list")(self.on_exercise_click)
 
         self.on_show_workouts()
 
@@ -220,14 +157,14 @@ class FitnessApp:
         container = document.getElementById("workouts-list")
         container.innerHTML = ""
 
-        if not self.persistence.has_workouts:
+        if not self.persistence.workouts.has_workouts:
             li = document.createElement("li")
             li.textContent = "No workouts yet. Click 'New workout' to start!"
             li.className = "empty-hint"
             container.appendChild(li)
             return
 
-        for workout_date in self.persistence.workout_dates:
+        for workout_date in self.persistence.workouts.workout_dates:
             li = document.createElement("li")
             li.className = "workout-item"
             li.setAttribute("workout-date", workout_date)
@@ -254,7 +191,7 @@ class FitnessApp:
             d.getMinutes(),
             d.getSeconds(),
         )
-        self.persistence.new_workout(workout_str=self.current_workout_date)
+        self.persistence.new_workout(workout_date=self.current_workout_date)
         self.persistence.save()
         self._dom_show_workout()
 
@@ -274,9 +211,9 @@ class FitnessApp:
         container.innerHTML = ""
 
         for exercise in self.persistence.who.exercises:
-            done = self.persistence.get_done(
+            done = self.persistence.get_exercise(
                 machine=exercise.machine, workout_date=self.current_workout_date
-            )
+            ).done
             li = document.createElement("li")
             li.className = "exercise-item" + (" done" if done else "")
             li.setAttribute("data-key", exercise.machine)
@@ -315,21 +252,19 @@ class FitnessApp:
         assert self.current_exercise is not None
         exercise = self.current_exercise.exercise
 
+        workout_exercise = self.current_exercise.get_workout_exercise(
+            persistence=self.persistence
+        )
+
         document.getElementById("exercise-key").textContent = exercise.machine
         document.getElementById("exercise-short").textContent = exercise.short
         document.getElementById("exercise-comment").textContent = exercise.comment
-        document.getElementById("exercise-weight").value = str(
-            self.current_exercise.get_value(persistence=self.persistence, key="weight")
-        )
-        document.getElementById("exercise-set1").value = str(
-            self.current_exercise.get_value(persistence=self.persistence, key="set1")
-        )
-        document.getElementById("exercise-set2").value = str(
-            self.current_exercise.get_value(persistence=self.persistence, key="set2")
-        )
+        document.getElementById("exercise-weight").value = str(workout_exercise.weight)
+        document.getElementById("exercise-set1").value = str(workout_exercise.set1)
+        document.getElementById("exercise-set2").value = str(workout_exercise.set2)
 
         card = document.getElementById("exercise-detail-card")
-        done = self.current_exercise.get_value(persistence=self.persistence, key="done")
+        done = workout_exercise.done
         if done:
             card.classList.add("done")
         else:
@@ -346,38 +281,21 @@ class FitnessApp:
     def on_done_exercise(self, event=None) -> None:
         assert self.current_exercise is not None
 
+        workout_exercise = self.current_exercise.get_workout_exercise(
+            persistence=self.persistence
+        )
         weight_val = str(document.getElementById("exercise-weight").value)
         if weight_val:
-            self.current_exercise.set_value(
-                self.persistence,
-                key="weight",
-                value=float(weight_val),
-            )
+            workout_exercise.weight = float(weight_val)
 
         set1 = str(document.getElementById("exercise-set1").value)
         if set1:
-            self.current_exercise.set_value(
-                self.persistence,
-                key="set1",
-                value=int(set1),
-            )
+            workout_exercise.set1 = int(set1)
         set2 = str(document.getElementById("exercise-set2").value)
         if set1:
-            self.current_exercise.set_value(
-                self.persistence,
-                key="set2",
-                value=int(set2),
-            )
+            workout_exercise.set2 = int(set2)
 
-        done = self.current_exercise.get_value(
-            self.persistence,
-            key="done",
-        )
-        self.current_exercise.set_value(
-            self.persistence,
-            key="done",
-            value=not done,
-        )
+        workout_exercise.done = not workout_exercise.done
 
         self.persistence.save()
         self._dom_show_workout()
@@ -385,28 +303,22 @@ class FitnessApp:
     def on_show_json(self, event=None) -> None:
         assert self.current_workout_date != ""
         self._dom_show_view("view-json")
-        kwargs = {} if IS_MICROPYTHON else {"indent": 2}
-        document.getElementById("json-content").value = json.dumps(
-            self.persistence.get_workout(
-                workout_date=self.current_workout_date,
-                remove_done=True,
-            ),
-            **kwargs,  # type: ignore
-        )
+        document.getElementById(
+            "json-content"
+        ).value = self.persistence.workouts.persistent_text
         document.getElementById("json-error").textContent = ""
 
     def on_save_json(self, event=None) -> None:
         workout_text = str(document.getElementById("json-content").value)
         error_el = document.getElementById("json-error")
         try:
-            dict_workout = json.loads(workout_text)
+            workouts = configuration.Workouts.persistent_factory(
+                workouts_text=workout_text
+            )
         except ValueError as e:
-            error_el.textContent = f"Invalid JSON: {e}"
+            error_el.textContent = f"Invalid Python: {e}"
             return
-        self.persistence.set_workout(
-            workout_date=self.current_workout_date,
-            dict_workout=dict_workout,
-        )
+        self.persistence.set_workouts(workouts=workouts)
         self.persistence.save()
         error_el.textContent = ""
         self._dom_show_workout()

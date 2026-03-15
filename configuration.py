@@ -1,4 +1,75 @@
-# from __future__ import annotations
+from __future__ import annotations
+import dataclasses
+
+
+@dataclasses.dataclass
+class WorkoutExercise:
+    machine: str
+    weight: float = 40.0
+    set1: int = 15
+    set2: int = 15
+    done: bool = False
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.machine, str)
+        assert isinstance(self.weight, float)
+        assert isinstance(self.set1, int)
+        assert isinstance(self.set2, int)
+        assert isinstance(self.done, bool)
+
+
+class WorkoutExercises(list[WorkoutExercise]):
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({super().__repr__()})"
+
+    @property
+    def progress_text(self) -> str:
+        done_count = sum(1 for v in self if v.done)
+        total_count = len(self)
+        return f"{done_count}/{total_count} done"
+
+    def get_exercise(self, machine: str) -> WorkoutExercise:
+        for exercise in self:
+            if exercise.machine == machine:
+                return exercise
+        raise ValueError(
+            f"machine '{machine}' not found! {','.join(e.machine for e in self)}"
+        )
+
+
+@dataclasses.dataclass
+class Workout:
+    workout_date: str
+    exercises: WorkoutExercises
+
+
+class Workouts(list[Workout]):
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({super().__repr__()})"
+
+    def get_workout(self, workout_date: str) -> Workout:
+        for workout in self:
+            if workout.workout_date == workout_date:
+                return workout
+        raise ValueError(f"workoutdate '{workout_date} not found!")
+
+    @property
+    def has_workouts(self) -> bool:
+        return len(self) > 0
+
+    @property
+    def persistent_text(self) -> str:
+        return repr(self)
+
+    @staticmethod
+    def persistent_factory(workouts_text: str) -> Workouts:
+        v = eval(workouts_text)
+        assert isinstance(v, Workouts)
+        return v
+
+    @property
+    def workout_dates(self) -> list[str]:
+        return sorted({w.workout_date for w in self}, reverse=True)
 
 
 class Exercise:
@@ -16,21 +87,13 @@ class Exercise:
 
 
 class Who:
-    WORKOUT_KEYS = ("done", "weight", "set1", "set2")
-    WORKOUT_DEFAULT_VALUES: dict[str, float | int | bool] = {
-        "weight": 40.0,
-        "set1": 15,
-        "set2": 15,
-        "done": False,
-    }
-
     def __init__(
         self,
         key: str,
         name: str,
         image: str,
         exercises: list[Exercise],
-        workout_template: dict,
+        workout_template: WorkoutExercises,
     ):
         self.key = key
         self.name = name
@@ -39,35 +102,26 @@ class Who:
         self.workout_template = workout_template
 
     def validate(self) -> None:
-        Who.validate_workout(self.workout_template)
+        Who.validate_workout_exercisses(self.workout_template)
+        for workout_exercise in self.workout_template:
+            self.get_exercise(workout_exercise.machine)
 
     @staticmethod
-    def validate_workout(
-        dict_workout: dict[str, dict[str, float | int | bool]],
-    ) -> None:
-        for key, workout_exercise in dict_workout.items():
-            assert isinstance(key, str)
-            Who.validate_workout_exercise(workout_exercise=workout_exercise)
+    def validate_workouts(workouts: Workouts) -> None:
+        for workout in workouts:
+            assert isinstance(workout, Workout)
+            Who.validate_workout_exercisses(workout_exercises=workout.exercises)
 
     @staticmethod
-    def validate_workout_exercise(
-        workout_exercise: dict[str, float | int | bool],
-    ) -> None:
-        for key, value in workout_exercise.items():
-            assert key in Who.WORKOUT_KEYS
-            assert isinstance(value, (float, int, bool)), value
+    def validate_workout_exercisses(workout_exercises: WorkoutExercises) -> None:
+        for workout_exercise in workout_exercises:
+            assert isinstance(workout_exercise, WorkoutExercise)
 
     def get_exercise(self, machine: str) -> Exercise:
         for exercise in self.exercises:
             if exercise.machine == machine:
                 return exercise
         raise ValueError(f"machine '{machine}' not found for '{self.key}'")
-
-    def get_default_value(self, machine: str, key: str) -> float | int | bool:
-        assert key in self.WORKOUT_KEYS
-        dict_workout_exercise = self.workout_template[machine]
-        default_value = self.WORKOUT_DEFAULT_VALUES[key]
-        return dict_workout_exercise.get(key, default_value)
 
 
 FACTOR_TWO_MACHINES = "priority_snail.png"
@@ -135,18 +189,20 @@ WHO_HANS = Who(
             FACTOR_TWO_MACHINES,
         ),
     ],
-    workout_template={
-        "D1/D4": {"weight": 30.0},
-        "B2/B7": {"weight": 23.0},
-        "B5": {"weight": 40.0},
-        "F1": {"weight": 15.0},
-        "B4": {"weight": 20.0},
-        "C3": {"weight": 36.0},
-        "C1": {"weight": 30.0},
-        "B3": {"weight": 35.0},
-        "A5": {"weight": 35.0},
-        "A2": {"weight": 60.0},
-    },
+    workout_template=WorkoutExercises(
+        [
+            WorkoutExercise(machine="D1/D4", weight=30.0),
+            WorkoutExercise(machine="B7/D2", weight=23.0),
+            WorkoutExercise(machine="B5", weight=40.0),
+            WorkoutExercise(machine="F1", weight=15.0),
+            WorkoutExercise(machine="B4", weight=20.0),
+            WorkoutExercise(machine="C3", weight=36.0),
+            WorkoutExercise(machine="C1", weight=30.0),
+            WorkoutExercise(machine="B3", weight=35.0),
+            WorkoutExercise(machine="A5", weight=35.0),
+            WorkoutExercise(machine="A2", weight=60.0),
+        ]
+    ),
 )
 WHO_SANDRA = Who(
     key="sandra",
@@ -213,19 +269,21 @@ WHO_SANDRA = Who(
             FACTOR_TWO_MACHINES,
         ),
     ],
-    workout_template={
-        "D2": {"weight": 12.5, "set1": 18, "set2": 18},
-        "F1": {"weight": 7.5, "set1": 15, "set2": 10},
-        "E1": {"weight": 54.5, "set1": 16, "set2": 15},
-        "E2": {"weight": 38.3, "set1": 18, "set2": 15},
-        "B5": {"weight": 27.5, "set1": 18, "set2": 15},
-        "H2": {"weight": 9.0, "set1": 18, "set2": 13},
-        "Mitte1": {"weight": 3.0, "set1": 17, "set2": 17},
-        "Mitte2": {"weight": 3.0, "set1": 16, "set2": 16},
-        "C1": {"weight": 30.0, "set1": 18, "set2": 18},
-        "A5": {"weight": 17.5, "set1": 18, "set2": 18},
-        "A2": {"weight": 40.0, "set1": 18, "set2": 18},
-    },
+    workout_template=WorkoutExercises(
+        [
+            WorkoutExercise(machine="D2", weight=12.5, set1=18, set2=18),
+            WorkoutExercise(machine="F1", weight=7.5, set1=15, set2=10),
+            WorkoutExercise(machine="E1", weight=54.5, set1=16, set2=15),
+            WorkoutExercise(machine="E2", weight=38.3, set1=18, set2=15),
+            WorkoutExercise(machine="B5", weight=27.5, set1=18, set2=15),
+            WorkoutExercise(machine="H2", weight=9.0, set1=18, set2=13),
+            WorkoutExercise(machine="Mitte1", weight=3.0, set1=17, set2=17),
+            WorkoutExercise(machine="Mitte2", weight=3.0, set1=16, set2=16),
+            WorkoutExercise(machine="C1", weight=30.0, set1=18, set2=18),
+            WorkoutExercise(machine="A5", weight=17.5, set1=18, set2=18),
+            WorkoutExercise(machine="A2", weight=40.0, set1=18, set2=18),
+        ]
+    ),
 )
 
 LIST_WHO = (WHO_HANS, WHO_SANDRA)
