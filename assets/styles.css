@@ -17,8 +17,8 @@ py-terminal {
 
 /* ── CSS custom properties ────────────────────────────────── */
 :root {
-  --primary: #e2001a;
-  --primary-dark: #b0001a;
+  --primary: #0022e2;
+  --primary-dark: #0026e2;
   --success: #388e3c;
   --muted: #757575;
   --muted-bg: #f0f0f0;
@@ -45,7 +45,7 @@ body {
 /* ── Hans im Glück floating animation ────────────────────── */
 #hans-im-glueck {
   position: fixed;
-  top: 80vh;
+  top: 5vh;
   width: 90px;
   height: auto;
   pointer-events: auto;
@@ -65,8 +65,6 @@ body {
 
 /* ── Header ───────────────────────────────────────────────── */
 header {
-  background: var(--primary);
-  color: #fff;
   padding: 0 1.25rem;
   display: flex;
   align-items: center;
@@ -134,7 +132,7 @@ li {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin-bottom: 0.55rem;
-  padding: 0.75rem 1rem;
+  padding: 0.3rem 1rem;
 }
 
 /* Workouts list */
