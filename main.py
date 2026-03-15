@@ -97,7 +97,7 @@ class FitnessApp:
         self._dom_update_who()
 
         when("click", "#btn-new-workout")(self.on_new_workout)
-        when("click", "#hans-im-glueck")(self.on_toggle_who)
+        when("click", "#who-name")(self.on_toggle_who)
         when("click", "#btn-back-to-workouts")(self.on_show_workouts)
         when("click", "#btn-done")(self.on_done_exercise)
         when("click", "#btn-cancel")(self.on_cancel_exercise)
