@@ -18,7 +18,7 @@ WHO_HANS = application.Who(
         application.Exercise(
             "D1/D4",
             "Chest Press",
-            "Nautilus, Sitz 7, Rücken 2",
+            "Nautilus, Sitz 7, Rücken 3",
             FACTOR_DOUBLE_EXERCISE,
         ),
         application.Exercise(
